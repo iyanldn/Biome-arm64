@@ -1,0 +1,40 @@
+name: Build ARM64
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-arm64:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install completion deps
+        run: |
+          sudo apt update
+          sudo apt install -y gcc-aarch64-linux-gnu pkg-config libssl-dev
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: aarch64-unknown-linux-gnu
+          override: true
+
+      - name: Debug repo structure
+        run: ls -R .
+
+      - name: Build
+        run: cargo build --release --target aarch64-unknown-linux-gnu
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: biome-arm64
+          path: target/aarch64-unknown-linux-gnu/release/biome
